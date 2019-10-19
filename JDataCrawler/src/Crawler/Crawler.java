@@ -5,12 +5,14 @@ import java.util.Iterator;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import Logger.Logger;
+import Scraper.Item;
 import Scraper.WebScraper.*;
 
 public class Crawler implements Runnable {
@@ -68,6 +70,16 @@ public class Crawler implements Runnable {
 		this.scraper = scraper;
 	}
 	
+	Crawler(String nome , Logger logger , Map<String , Page> map){
+		this(nome , logger);
+		this.paginaMap = new LinkedHashMap<String, Page>( map );
+	}
+	
+	Crawler(WebScraper scraper , Logger logger , Map<String , Page> map){
+		this(scraper , logger);
+		this.paginaMap = new LinkedHashMap<String, Page>( map );
+
+	}
 	
 	Crawler(String nome , Logger logger){
 		this(nome);
@@ -121,12 +133,20 @@ public class Crawler implements Runnable {
 		if (node == null && urlVisited.contains(node.baseUri())) {
 			return;
 		}
-		Produto produto = (Produto) scraper.scrap(node.baseUri());
-		urlVisited.add(node.baseUri());
-		if (produto.temInfo()) {
-			paginaMap.put(produto.getUrl(), produto);
-			logger.log(produto.toString());
-			//System.out.println(produto);
+		String url = node.baseUri();
+		Page page = scraper.scrap(url);
+		urlVisited.add(url);
+
+		if (page.temInfo()) {
+			
+			paginaMap.entrySet().forEach( e->{
+				if(e.getValue().getData().equals(page.getData())) {
+					return;
+				}
+			});
+			
+			paginaMap.put(url , page);
+			logger.log(page.toString());
 		} else {
 			return;
 		}

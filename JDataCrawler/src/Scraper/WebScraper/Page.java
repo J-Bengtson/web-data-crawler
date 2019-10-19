@@ -26,20 +26,12 @@ public class Page extends Item<Object>{
 		return "Pagina [ "+ data +"]";
 	}
 	
-	public boolean temInfo() {
-		return this.data.size() > 0;
-	}
-	
 	public String getUrl() {
 		return this.url;
 	}
 	
 	public void setUrl(String url) {
 		this.url = url;
-	}
-	
-	public Map<String,Object> getInfo(){
-		return this.data;
 	}
 
 
