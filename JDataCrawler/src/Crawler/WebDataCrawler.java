@@ -20,7 +20,7 @@ public class WebDataCrawler extends Crawler{
 	
 	
 	private List<Crawler> crawlerList = new LinkedList<Crawler>();
-		// armazenador dos bots (spiders)
+		// armazenador de bots (spiders)
 
 	WebDataCrawler(String nome , Logger logger){
 		super(nome , logger);
@@ -37,7 +37,7 @@ public class WebDataCrawler extends Crawler{
 		// filtra elementos pelo selector css a[href]
 
 		elementos.forEach(elemento->{ // busca exaustiva a todos os componentes a[href] da pagina
-			Crawler crawler = new Crawler(super.scraper , super.logger); //cria-se bot 
+			Crawler crawler = new Crawler(super.scraper , super.logger , super.getPaginaMap()); //cria-se bot 
 			crawler.start(requisitaHTML(elemento.absUrl("href")).baseUri()); //realiza requisicao da pagina href e 
 																		//começa processo de busca referente ao href da iteração
 			crawlerList.add(crawler);//armazena bot

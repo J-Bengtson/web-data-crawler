@@ -10,17 +10,11 @@ public abstract class Item<T>{
 	protected Item(){
 		super();
 		data = new LinkedHashMap<String,T>();
-
 	}
 	
 	public Map<String,T> getData() {
 		return this.data;
 	}
-	
-	public void add(String name , T data) {
-		this.data.put(name, data);
-	}
-	
 	
 	public void putManyData(Map<String, T> map) {
 		map.keySet().removeAll(data.keySet()); // remove do conjunto map todas as informacoes previamente cadastradas
@@ -32,5 +26,17 @@ public abstract class Item<T>{
 			return;
 		data.put(chave, valor); // insere informacao
 	}
+	
+	
+	public boolean temInfo() {
+		return this.data.size() > 0;
+	}
+
+	
+	public Map<String,T> getInfo(){
+		return this.data;
+	}
+
+
 	
 }
