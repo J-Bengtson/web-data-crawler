@@ -34,10 +34,4 @@ public class Page extends Item<Object>{
 		this.url = url;
 	}
 
-
-
-
-
-
-
 }

@@ -14,11 +14,11 @@ import Scraper.Scrapable;
 public interface WebScraper extends Scrapable<Page>{
 	
 	/*
-	 * Metodo extrairInformacoes(url) faz a extração dos dados de uma página HTML
-	 * atraves da identificação dos elementos pelos selectores CSS.
+	 * Metodo extrairInformacoes(url) faz a extraï¿½ï¿½o dos dados de uma pï¿½gina HTML
+	 * atraves da identificaï¿½ï¿½o dos elementos pelos selectores CSS.
 	 *
-	 * Input: (String url) A url da página do produto será passada como input.
-	 * Output: (Produto) Classe representa de forma genérica produto do e-commerce.
+	 * Input: (String url) A url da pï¿½gina do produto serï¿½ passada como input.
+	 * Output: (Produto) Classe representa de forma genï¿½rica produto do e-commerce.
 	 * 
 	 */
 	
@@ -26,25 +26,25 @@ public interface WebScraper extends Scrapable<Page>{
 		try {
 			return Jsoup.connect(url).get();
 		} catch (IOException e) {
-			
+			//Logger.Logger.getINSTANCE().log(e.getMessage()+" "+e.toString());
 		}
 		return null;
 	}
 	
 	default String extrairDado(Element document, String selector) {
-		// Realiza extração do(s) dado(s) referente ao seletor CSS
+		// Realiza extraï¿½ï¿½o do(s) dado(s) referente ao seletor CSS
 		Elements elements = document.select(selector);
 		return (elements.size() > 0) ? elements.get(0).text() : elements.text();
 	}
 	
 	default Map<String, Object> extrairDados(Element document, String selector, String cssQueryKey , String cssQueryValue) 
 	{
-		// metodo é uma forma automatizada de captura em grande escala e padronizada. 
-		// Atributos : selector é a query css a ser extraida do HTML, cssQueryKey é o completo do selector para capturar chave e cssQueryValue é o complemento do selector para capturar valor
-		Map<String, Object> map = new LinkedHashMap<String, Object>(); // Estrutura de dados para alocação das
-																		// informações por inserção Chave/Valor
-																		// (dicionário)
-		// Realiza extração do(s) dado(s) referente ao seletor CSS e armazena-os no map
+		// metodo ï¿½ uma forma automatizada de captura em grande escala e padronizada. 
+		// Atributos : selector ï¿½ a query css a ser extraida do HTML, cssQueryKey ï¿½ o completo do selector para capturar chave e cssQueryValue ï¿½ o complemento do selector para capturar valor
+		Map<String, Object> map = new LinkedHashMap<String, Object>(); // Estrutura de dados para alocaï¿½ï¿½o das
+																		// informaï¿½ï¿½es por inserï¿½ï¿½o Chave/Valor
+																		// (dicionï¿½rio)
+		// Realiza extraï¿½ï¿½o do(s) dado(s) referente ao seletor CSS e armazena-os no map
 		Elements elementoRoot = document.select(selector);
 		int cout = 0;
 		Iterator<Element> iterator = elementoRoot.iterator();

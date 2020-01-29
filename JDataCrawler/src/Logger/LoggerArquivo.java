@@ -12,10 +12,5 @@ public class LoggerArquivo extends Logger{
 		this.nomeArquivo = nomeArquivo;
 	}
 	
-	@Override
-	public
-	void log(String mensage) {
-		this.getDestination().println(mensage);
-	}
 
 }

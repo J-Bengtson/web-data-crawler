@@ -5,7 +5,7 @@ import java.util.Map;
 
 public abstract class Item<T>{
 	
-	protected Map<String,T> data;//estrutura de dados map para alocação de informação estruturada em Chave/Valor
+	protected Map<String,T> data;//estrutura de dados map para alocaï¿½ï¿½o de informaï¿½ï¿½o estruturada em Chave/Valor
 	
 	protected Item(){
 		super();
@@ -28,15 +28,7 @@ public abstract class Item<T>{
 	}
 	
 	
-	public boolean temInfo() {
+	public boolean temDados() {
 		return this.data.size() > 0;
 	}
-
-	
-	public Map<String,T> getInfo(){
-		return this.data;
-	}
-
-
-	
 }

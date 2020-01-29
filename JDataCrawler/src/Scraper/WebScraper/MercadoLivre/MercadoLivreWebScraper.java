@@ -34,13 +34,14 @@ public class MercadoLivreWebScraper implements WebScraper{
 		Produto produto = new MercadoLivreProduto(url);
 		
 		Element elemento = this.requisitaHTML(url);
-		if(elemento == null) return produto;
+		
 		// add informacao extraida da pagina ao produto
 		produto.putData( "Nome" , this.extrairDado(elemento, ".item-title"));
-		produto.putData( "Preço" ,this.extrairDado(elemento, "#productInfo > fieldset.item-price"));
-		produto.putData( "Descrição" , this.extrairDado(elemento, ".item-description"));
+		produto.putData( "Preco" ,this.extrairDado(elemento, "#productInfo > fieldset.item-price"));
+		produto.putData( "Descricao" , this.extrairDado(elemento, ".item-description"));
 		produto.putManyData(this.extrairDados(elemento, ".specs-list > li", " > strong" , " > span"));
 			
+		//System.out.println(produto);
 		return produto;
 	}
 

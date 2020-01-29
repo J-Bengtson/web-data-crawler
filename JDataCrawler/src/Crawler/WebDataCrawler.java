@@ -5,6 +5,9 @@ import java.util.LinkedList;
 
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import Crawler.Crawler;
@@ -13,9 +16,30 @@ import Scraper.WebScraper.*;
 
 public class WebDataCrawler extends Crawler{
 	
-	public static void main(String[]args) { // main teste unitario da classe WebDataCrawler
-		WebDataCrawler wcrawler = new WebDataCrawler("mercado livre" , Logger.getINSTANCE(2));
-		wcrawler.start("https://www.mercadolivre.com.br/");
+	public static void main(String[]args) { // main teste unitario da classe WebDataCrawler		
+		
+		WebDataCrawler crawler = new WebDataCrawler(new WebScraper() {
+
+			@Override
+			public Page scrap(String url) {
+				Page p = new Page(url);
+				Element document = this.requisitaHTML(url);
+				p.putData("headline", this.extrairDado(document, "#firstHeading"));
+				
+//				System.out.println(p);
+				return p;
+			}
+			
+		} , Logger.getINSTANCE());
+		crawler.start("https://pt.wikipedia.org/wiki/Aprendizado_de_m%C3%A1quina" );
+		
+// 		WebDataCrawler crawler = new WebDataCrawler("mercado livre" , Logger.getINSTANCE());
+//		crawler.start("http://www.mercadolivre.com.br");
+//		
+////		
+//		WebDataCrawler crawler = new WebDataCrawler("netshoes" , Logger.getINSTANCE());
+//		crawler.start("http://www.netshoes.com.br/");
+//		
 	}
 	
 	
@@ -29,18 +53,37 @@ public class WebDataCrawler extends Crawler{
 		super(scraper , logger);
 	}
 	
-
 	@Override
 	public void run() {
+		
+		Logger.getINSTANCE().log("starting...");
+		if(!this.word.isEmpty())
+			Logger.getINSTANCE().log("set word "+this.word);
+		
+		Element HTML = this.requisitaHTML(super.getUrl());
 
-		Elements elementos = this.requisitaHTML(super.getUrl()).select("a[href]"); 
-		// filtra elementos pelo selector css a[href]
+		if(HTML == null) {
+	        JOptionPane.showMessageDialog (null, "Forbidden: You don't have permission to access [directory] on this server\n" + 
+	        		"\n" + 
+	        		"HTTP Error 403 â€“ solution : Proxy");
+	        	        
+	        System.exit(1);
+		}
 
-		elementos.forEach(elemento->{ // busca exaustiva a todos os componentes a[href] da pagina
-			Crawler crawler = new Crawler(super.scraper , super.logger , super.getPaginaMap()); //cria-se bot 
-			crawler.start(requisitaHTML(elemento.absUrl("href")).baseUri()); //realiza requisicao da pagina href e 
-																		//começa processo de busca referente ao href da iteração
-			crawlerList.add(crawler);//armazena bot
+		Elements elementos = HTML.select("a[href]"); // filtra elementos pelo selector css a[href]
+
+		elementos.forEach(elemento -> { // busca exaustiva a todos os componentes a[href] da pagina
+			try {
+				Crawler crawler = new Crawler(super.scraper , super.logger , super.urlVisited); //cria-se bot
+				String nextURL = elemento.absUrl("href");
+//				System.out.println(nextURL);
+				crawler.start(nextURL , this.word); //realiza requisicao da pagina href e 														//comeï¿½a processo de busca referente ao href da iteraï¿½ï¿½o
+				crawlerList.add(crawler);//armazena bot
+			}catch( Exception e) {
+				Logger.getINSTANCE().log("Exception " +e.toString());
+			}
+			
+			
 		});	
 //		while(!crawlerList.isEmpty()) {
 //			System.out.println(".");

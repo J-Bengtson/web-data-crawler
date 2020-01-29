@@ -16,7 +16,7 @@ public class NetshoesWebScraper implements WebScraper
 	public static void main( String[] args ) throws IOException 
 	{
 		//Acesse o diretorio onde se encontra o arquivo NetshoesWebScraper.jar
-		// Execute o comando no terminal 'java -jar NetshoesWebScraper.jar (URL)' juntamente com a url da página
+		// Execute o comando no terminal 'java -jar NetshoesWebScraper.jar (URL)' juntamente com a url da pï¿½gina
 		//ou Execute o comando Execute o comando no terminal 'java -jar NetshoesWebScraper.jar' em seguida a url e tecle ENTER
 		// exemplo : java -jar NetshoesWebScraper.jar 
 		
@@ -39,31 +39,31 @@ public class NetshoesWebScraper implements WebScraper
 	}
 
 	/*
-	 * Metodo extrairInformacoes(url) faz a extração dos dados de uma página HTML atraves da identificação dos elementos pelos selectores CSS.
+	 * Metodo extrairInformacoes(url) faz a extraï¿½ï¿½o dos dados de uma pï¿½gina HTML atraves da identificaï¿½ï¿½o dos elementos pelos selectores CSS.
 	 *
-	 * Input: (String url) A url da página do produto será passada como input.
-	 * Output: (Produto) Classe representa de forma genérica produto do e-commerce.
+	 * Input: (String url) A url da pï¿½gina do produto serï¿½ passada como input.
+	 * Output: (Produto) Classe representa de forma genï¿½rica produto do e-commerce.
 	 * 
 	 */
 	@Override
 	public Produto scrap(String url) {
 		NetshoesProduto produto = new NetshoesProduto(url);
 
-		Element document = requisitaHTML(url); //Realiza requisição e captura da página
-		
+		Element document = requisitaHTML(url); //Realiza requisiï¿½ï¿½o e captura da pï¿½gina
 		
 		//extrai dados e add atributo a produto
 		produto.putData("Nome:" , extrairDado(document , ".short-description > [itemprop=name]"));
 		produto.putData("Ref.:" , extrairDado(document, ".reference > span"));
-		produto.putData("Preço:", extrairDado(document , "[itemprop=price]"));
-		produto.putData("Descrição:" , extrairDado(document , "[itemprop=description]") );
+		produto.putData("Preco:", extrairDado(document , "[itemprop=price]"));
+		produto.putData("Descricaoo:" , extrairDado(document , "[itemprop=description]") );
 		
-		produto.putData("Gênero:" , extrairDado(document , ".attributes li:nth-child(2)"));
+		produto.putData("Genero:" , extrairDado(document , ".attributes li:nth-child(2)"));
 		produto.putData("Indicado para:" , extrairDado(document , ".attributes > li:nth-child(3)"));
 		produto.putData("Origem:" , extrairDado(document ,  ".attributes > li:last-child"));			
 		produto.putManyData( extrairDados(document , ".attributes > li" , " > strong" , ":not(strong)"));
 		
-	
+
+		System.out.println(produto);
 		return produto; // retorna produto
 	}
 

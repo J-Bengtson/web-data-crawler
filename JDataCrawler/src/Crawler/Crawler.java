@@ -1,11 +1,16 @@
 package Crawler;
 
+
+
 import java.util.Iterator;
 
-
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Scanner;
 
 import org.jsoup.nodes.Element;
@@ -30,75 +35,68 @@ public class Crawler implements Runnable {
 
 				// add informacao extraida da pagina ao produto
 				produto.putData("Nome", this.extrairDado(elemento, ".item-title"));
-				produto.putData("Preço", this.extrairDado(elemento, "#productInfo > fieldset.item-price"));
-				produto.putData("Descrição", this.extrairDado(elemento, ".item-description"));
+				produto.putData("Preco", this.extrairDado(elemento, "#productInfo > fieldset.item-price"));
+				produto.putData("Descricao", this.extrairDado(elemento, ".item-description"));
 				produto.putManyData(this.extrairDados(elemento, ".specs-list > li", " > strong", " > span"));
 
 				return produto;
 			}
 
-		} , Logger.getINSTANCE(1)).start(new Scanner(System.in).nextLine());
-		
+		}, Logger.getINSTANCE()).start(new Scanner(System.in).nextLine());
+
 	}
 
 	protected String urlRoot;
-	
-	protected LinkedHashMap<String, Page> paginaMap;
-	
+
 	protected LinkedHashSet<String> urlVisited;
-	
+
 	protected Thread thread;
-	
+
 	protected WebScraper scraper;
-	
+
 	protected Logger logger;
 
 	private Crawler() {
-		super();
-		this.paginaMap = new LinkedHashMap<String, Page>();
 		this.urlVisited = new LinkedHashSet<String>();
 		thread = new Thread(this);
 	}
-	
+
 	private Crawler(String nome) {
 		this();
 		this.scraper = WebScraperFactory.getInstance().getWebScraper(nome);
 	}
-	
+
 	private Crawler(WebScraper scraper) {
 		this();
 		this.scraper = scraper;
 	}
-	
-	Crawler(String nome , Logger logger , Map<String , Page> map){
-		this(nome , logger);
-		this.paginaMap = new LinkedHashMap<String, Page>( map );
-	}
-	
-	Crawler(WebScraper scraper , Logger logger , Map<String , Page> map){
-		this(scraper , logger);
-		this.paginaMap = new LinkedHashMap<String, Page>( map );
 
+
+	Crawler(WebScraper scraper, Logger logger) {
+		this(scraper);
+		this.logger = logger;
+		
 	}
-	
-	Crawler(String nome , Logger logger){
+
+	Crawler(String nome, Logger logger) {
 		this(nome);
 		this.logger = logger;
 	}
+
 	
-	Crawler(WebScraper scraper , Logger logger){
-		this(scraper);
-		this.logger = logger;
+	Crawler(WebScraper scraper , Logger logger , LinkedHashSet<String> urlVisited){
+		this(scraper , logger);
+		this.urlVisited = urlVisited;
 	}
 
-
-
-
-
+	public void start(String url , String word) {
+		this.word = word.toLowerCase().trim();
+		this.start(url);
+	}
 	public void start(String url) {
-		if(url == null)
+		if (url == null)
 			return;
-		this.urlRoot = url;
+		this.urlRoot = url;		
 		this.thread.start();
 	}
 
@@ -118,40 +116,101 @@ public class Crawler implements Runnable {
 	public void run() {
 		try {
 			tracking(scraper.requisitaHTML(urlRoot));
-		}catch(Exception e) {
-			
+		} catch (Exception e) {
+
 		}
-		//Thread.currentThread().destroy();
+		// Thread.currentThread().destroy();
 	}
 
 	public Element requisitaHTML(String url) {
-		
 		return this.scraper.requisitaHTML(url);
 	}
 
+	private boolean ehInvalido(Element node) {
+		return node == null || urlVisited.contains(node.baseUri());
+	}
+
+	public String word = new String();
+
+	private boolean temWord() {
+		return !word.isEmpty();
+	}
+	
+	
+	private boolean validar(Page page) {
+				 
+		if( page.temDados() && temWord() ) {
+			
+			for(Map.Entry<String, Object> entry: page.getData().entrySet()) {
+				if(((String) entry.getValue()).trim().toLowerCase().contains(this.word)){
+					return true;
+				}else {
+					return false;
+				}
+			}
+		}else if( page.temDados() && !temWord()) {
+			return true;
+		}
+		return false;
+	}
+
+	
+	
+	private String nodeSelector = "a[href]";
+	private void trackingBFS(Element node) {
+
+		if (this.ehInvalido(node))
+			return; // verificacao inicial antes da procedencia do algoritmo
+
+		Queue<Element> arm = new LinkedList<Element>(); //
+		arm.add(node);
+
+		int count = 0;
+		do {
+
+			Element head = arm.remove(); // desenfileira
+			if (!this.ehInvalido(head)) {
+
+				String url = head.baseUri(); // obtem url
+				Page page = scraper.scrap(url); // extrai	
+				this.urlVisited.add(url);// add a lista de url visitadas
+			 
+				boolean pageValida = this.validar(page);
+//				System.out.println(pageValida+" "+ page+" "+ url);
+				if (this.validar(page)) { //this.validar(page)
+					this.logger.log(page.toString());
+				}
+				Elements elementos = node.select(this.nodeSelector);// captura e indexa elementos da pagina com propriedade "a[href]" 
+				Iterator<Element> iterator = elementos.iterator();
+				while (iterator.hasNext()) {
+					Element elemento = iterator.next();
+					arm.add(elemento);
+				}
+			}
+		} while (!arm.isEmpty() && ++count < MAX);// condicao de parada do algoritmo
+
+	}
+
+	int MAX = 100000;
+
 	private void tracking(Element node) {
-		if (node == null && urlVisited.contains(node.baseUri())) {
+		if (this.ehInvalido(node)) {
 			return;
 		}
 		String url = node.baseUri();
 		Page page = scraper.scrap(url);
 		urlVisited.add(url);
 
-		if (page.temInfo()) {
-			
-			paginaMap.entrySet().forEach( e->{
-				if(e.getValue().getData().equals(page.getData())) {
-					return;
-				}
-			});
-			
-			paginaMap.put(url , page);
+		boolean pageValida = this.validar(page);
+		//System.out.println(pageValida+" "+ page+" "+ url);
+		
+		if (this.validar(page)) {
 			logger.log(page.toString());
-		} else {
-			return;
 		}
-
-		Elements elementos = node.select("a[href]");
+		
+		
+		
+		Elements elementos = node.select(this.nodeSelector);
 		Iterator<Element> iterator = elementos.iterator();
 		while (iterator.hasNext()) {
 			Element elemento = iterator.next();
@@ -167,14 +226,6 @@ public class Crawler implements Runnable {
 
 	public void setUrl(String url) {
 		this.urlRoot = url;
-	}
-
-	public LinkedHashMap<String, Page> getPaginaMap() {
-		return paginaMap;
-	}
-
-	public void setPaginaMap(LinkedHashMap<String, Page> paginaMap) {
-		this.paginaMap = paginaMap;
 	}
 
 	public LinkedHashSet<String> getUrlVisited() {
