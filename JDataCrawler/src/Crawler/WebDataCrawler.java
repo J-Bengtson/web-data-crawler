@@ -18,20 +18,32 @@ public class WebDataCrawler extends Crawler{
 	
 	public static void main(String[]args) { // main teste unitario da classe WebDataCrawler		
 		
-		WebDataCrawler crawler = new WebDataCrawler(new WebScraper() {
-
-			@Override
-			public Page scrap(String url) {
-				Page p = new Page(url);
-				Element document = this.requisitaHTML(url);
-				p.putData("headline", this.extrairDado(document, "#firstHeading"));
+		
+		WebDataCrawler dataCrawler = new WebDataCrawler()
+				.addLogger(Logger.getINSTANCE())
 				
-//				System.out.println(p);
-				return p;
-			}
-			
-		} , Logger.getINSTANCE());
-		crawler.start("https://pt.wikipedia.org/wiki/Aprendizado_de_m%C3%A1quina" );
+				
+				
+				
+				.addScraper(new WebScraper() {
+
+					@Override
+					public Page scrap(String url , Element element) {
+						Page p = new Page(url);
+						p.putData("headline", this.extrairDado(element, "#firstHeading"));
+						
+//						System.out.println(p);
+						return p;
+					}
+					
+				})
+				.build();
+		
+		dataCrawler.start("https://pt.wikipedia.org/wiki/Aprendizado_de_m%C3%A1quina" );
+		
+		
+		
+		
 		
 // 		WebDataCrawler crawler = new WebDataCrawler("mercado livre" , Logger.getINSTANCE());
 //		crawler.start("http://www.mercadolivre.com.br");
@@ -42,10 +54,42 @@ public class WebDataCrawler extends Crawler{
 //		
 	}
 	
+	public WebDataCrawler() {
+		super();
+	}
+	
+	public WebDataCrawler build() {
+		return this;
+	}
+	
+	public WebDataCrawler addLogger(Logger logger) {
+		this.logger = logger;
+		return this;
+	}
+	public WebDataCrawler addScraper(WebScraper scraper) {
+		this.scraper = scraper;
+		return this;
+	}
+	
 	
 	private List<Crawler> crawlerList = new LinkedList<Crawler>();
 		// armazenador de bots (spiders)
 
+	private List<String> links = new LinkedList<String>();
+	
+	public WebDataCrawler addLinks( LinkedList<String> links) {
+		this.links = links;
+		return this;
+	}
+	
+
+	public WebDataCrawler addLinks(String link) {
+		links.add(link);
+		return this;
+	}
+	
+	
+	
 	WebDataCrawler(String nome , Logger logger){
 		super(nome , logger);
 	}
@@ -74,7 +118,7 @@ public class WebDataCrawler extends Crawler{
 
 		elementos.forEach(elemento -> { // busca exaustiva a todos os componentes a[href] da pagina
 			try {
-				Crawler crawler = new Crawler(super.scraper , super.logger , super.urlVisited); //cria-se bot
+				Crawler crawler = new Crawler(super.scraper , super.logger , super.urlVisited); //instancia crawler
 				String nextURL = elemento.absUrl("href");
 //				System.out.println(nextURL);
 				crawler.start(nextURL , this.word); //realiza requisicao da pagina href e 														//come�a processo de busca referente ao href da itera��o
@@ -97,5 +141,5 @@ public class WebDataCrawler extends Crawler{
 //		}
 //		System.out.println(this.paginaMap);
 	}
-	
+
 }

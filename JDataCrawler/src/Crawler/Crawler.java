@@ -56,7 +56,7 @@ public class Crawler implements Runnable {
 
 	protected Logger logger;
 
-	private Crawler() {
+	Crawler() {
 		this.urlVisited = new LinkedHashSet<String>();
 		thread = new Thread(this);
 	}
@@ -116,6 +116,8 @@ public class Crawler implements Runnable {
 	public void run() {
 		try {
 			tracking(scraper.requisitaHTML(urlRoot));
+			
+			trackingBFS(scraper.requisitaHTML(urlRoot));
 		} catch (Exception e) {
 
 		}
@@ -172,7 +174,7 @@ public class Crawler implements Runnable {
 			if (!this.ehInvalido(head)) {
 
 				String url = head.baseUri(); // obtem url
-				Page page = scraper.scrap(url); // extrai	
+				Page page = scraper.scrap(url , this.requisitaHTML(url)); // extrai	
 				this.urlVisited.add(url);// add a lista de url visitadas
 			 
 				boolean pageValida = this.validar(page);
@@ -198,7 +200,7 @@ public class Crawler implements Runnable {
 			return;
 		}
 		String url = node.baseUri();
-		Page page = scraper.scrap(url);
+		Page page = scraper.scrap(url , this.requisitaHTML(url));
 		urlVisited.add(url);
 
 		boolean pageValida = this.validar(page);
